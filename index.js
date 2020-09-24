@@ -13,6 +13,9 @@ const app = express();
 // Connect to database
 connectDB();
 
+// Client req.body parser
+app.use(express.json());
+
 // Middleware methods
 // NOTE these first two middleware methods are examples of a custom built logger and a third party logger; they perform the same job.
 if (process.env.NODE_ENV === 'development') {
