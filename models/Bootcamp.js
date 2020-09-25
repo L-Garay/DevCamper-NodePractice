@@ -102,7 +102,9 @@ const BootcampSchema = new mongoose.Schema({
 
 // Create bootcamp slug from string
 BootcampSchema.pre('save', function (next) {
+  // NOTE ignore the errors; when the code is executed it does properly display the name of the bootcamp and it correctly creates a slug and adds it to the bootcamp.  I don't know why there are errors.
   console.log('Slugify ran', this.name);
+  this.slug = slugify(this.name, { lower: true });
   next();
 });
 
