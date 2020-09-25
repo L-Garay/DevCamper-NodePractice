@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const geocoder = require('../utils/geocoder');
 
 const BootcampSchema = new mongoose.Schema({
   name: {
@@ -37,25 +38,23 @@ const BootcampSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add an address'],
   },
-  // location: {
-  //   //GeoJSON Point
-  //   type: {
-  //     type: String,
-  //     enum: ['Point'],
-  //     required: true,
-  //   },
-  //   coordinates: {
-  //     type: [Number],
-  //     required: true,
-  //     index: '2dsphere',
-  //   },
-  //   formattedAddress: String,
-  //   street: String,
-  //   city: String,
-  //   state: String,
-  //   zipcode: String,
-  //   country: String,
-  // },
+  location: {
+    //GeoJSON Point
+    type: {
+      type: String,
+      enum: ['Point'],
+    },
+    coordinates: {
+      type: [Number],
+      index: '2dsphere',
+    },
+    formattedAddress: String,
+    street: String,
+    city: String,
+    state: String,
+    zipcode: String,
+    country: String,
+  },
   careers: {
     type: [String],
     required: true,
@@ -102,9 +101,29 @@ const BootcampSchema = new mongoose.Schema({
 
 // Create bootcamp slug from string
 BootcampSchema.pre('save', function (next) {
-  // NOTE ignore the errors; when the code is executed it does properly display the name of the bootcamp and it correctly creates a slug and adds it to the bootcamp.  I don't know why there are errors.
   console.log('Slugify ran', this.name);
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+// NOTE ignore the errors; when the code is executed it does properly display the name of the bootcamp and it correctly creates a slug and adds it to the bootcamp.  I don't know why there are errors.
+
+// Geocode and create 'location' fields
+BootcampSchema.pre('save', async function (next) {
+  const loc = await geocoder.geocode(this.address);
+  console.log('this is from geocoder', loc[0]);
+  this.location = {
+    type: 'Point',
+    coordinates: [loc[0].longitude, loc[0].latitude],
+    formattedAddress: loc[0].formattedAddress,
+    street: loc[0].streetName,
+    city: loc[0].city,
+    state: loc[0].stateCode,
+    zipCode: loc[0].zipcode,
+    country: loc[0].countryCode,
+  };
+
+  // Do not save regular address in DB
+  this.address = undefined;
   next();
 });
 
