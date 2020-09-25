@@ -7,6 +7,7 @@ var options = {
   formatter: null,
 };
 
+// @ts-ignore
 const geocoder = nodeGeocoder(options);
 
 module.exports = geocoder;

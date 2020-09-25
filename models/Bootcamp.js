@@ -99,18 +99,25 @@ const BootcampSchema = new mongoose.Schema({
   },
 });
 
+// NOTE ignore the errors; when the code is executed each middleware function runs properly and executes what it's supposed to.  I'm not sure why there are so many errors, and yet everything works just fine.
+
 // Create bootcamp slug from string
+// @ts-ignore
 BootcampSchema.pre('save', function (next) {
+  // @ts-ignore
   console.log('Slugify ran', this.name);
+  // @ts-ignore
   this.slug = slugify(this.name, { lower: true });
   next();
 });
-// NOTE ignore the errors; when the code is executed it does properly display the name of the bootcamp and it correctly creates a slug and adds it to the bootcamp.  I don't know why there are errors.
 
 // Geocode and create 'location' fields
+// @ts-ignore
 BootcampSchema.pre('save', async function (next) {
+  // @ts-ignore
   const loc = await geocoder.geocode(this.address);
   console.log('this is from geocoder', loc[0]);
+  // @ts-ignore
   this.location = {
     type: 'Point',
     coordinates: [loc[0].longitude, loc[0].latitude],
@@ -121,8 +128,8 @@ BootcampSchema.pre('save', async function (next) {
     zipCode: loc[0].zipcode,
     country: loc[0].countryCode,
   };
-
   // Do not save regular address in DB
+  // @ts-ignore
   this.address = undefined;
   next();
 });
