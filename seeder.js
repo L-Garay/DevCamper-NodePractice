@@ -35,6 +35,7 @@ const importData = async () => {
 // Delete data
 const deleteData = async () => {
   try {
+    // NOTE it wants you to pass 1-3 arguments, but if you leave it blank it will delete all
     await Bootcamp.deleteMany();
     console.log('Data destroyed!!');
     process.exit();
