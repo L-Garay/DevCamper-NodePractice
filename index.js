@@ -26,8 +26,10 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 const bootcamps = require('./routes/bootcamps');
+const courses = require('./routes/courses');
 // Mounting the routes
 app.use('/api/v1/bootcamps', bootcamps);
+app.use('/api/v1/courses', courses);
 
 // Middleware methods
 app.use(errorHandler);
