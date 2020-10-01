@@ -1,8 +1,9 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const Course = require('../models/Course');
+const Bootcamp = require('../models/Bootcamp');
 
-// GET all courses FROM /api/v1/bootcamps PUBLIC
+// GET all courses FROM /api/v1/courses PUBLIC
 // Get all courses by bootcampId from /api/v1/bootcamps/:bootcampid/courses PUBLIC
 exports.getCourses = asyncHandler(async (req, res, next) => {
   let query;
@@ -22,5 +23,45 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
     success: true,
     count: courses.length,
     data: courses,
+  });
+});
+
+// GET course by id FROM /api/v1/courses/:id PUBLIC
+exports.getCourseById = asyncHandler(async (req, res, next) => {
+  const course = await Course.findById(req.params.id).populate({
+    path: 'bootcamp',
+    select: 'name description',
+  });
+
+  if (!course) {
+    return next(
+      new ErrorResponse(`No course with the id of ${req.params.id}`),
+      404
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    data: course,
+  });
+});
+
+// Post course  FROM /api/v1/bootcamps/:bootcampId/courses PRIVATE
+exports.createCourse = asyncHandler(async (req, res, next) => {
+  // Check to see if the bootcamp exists
+  const bootcamp = await Bootcamp.findById(req.params.bootcampId);
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`No bootcamp with the id of ${req.params.bootcampId}`),
+      404
+    );
+  }
+  // NOTE this is how we are setting the 'bootcamp' property on the Course object, since it needs to be an ObjectId of a bootcamp
+  req.body.bootcamp = req.params.bootcampId;
+  const course = await Course.create(req.body);
+
+  res.status(200).json({
+    success: true,
+    data: course,
   });
 });
