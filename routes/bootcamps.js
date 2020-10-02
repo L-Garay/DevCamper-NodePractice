@@ -23,7 +23,13 @@ router.route('/radius/:zipcode/:distance').get(getBootcampsInRadius);
 router.route('/:id/photo').put(uploadPhoto);
 router
   .route('/')
-  .get(advancedResults(Bootcamp, 'courses'), getBootcamps)
+  .get(
+    advancedResults(Bootcamp, {
+      path: 'courses',
+      select: 'title tuition',
+    }),
+    getBootcamps
+  )
   .post(createBootcamp);
 router
   .route('/:id')
