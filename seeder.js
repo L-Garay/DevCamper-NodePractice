@@ -29,7 +29,7 @@ const courses = JSON.parse(
 const importData = async () => {
   try {
     await Bootcamp.create(bootcamps);
-    // await Course.create(courses);
+    await Course.create(courses);
     console.log('Data imported!!');
     process.exit();
   } catch (error) {
@@ -41,7 +41,9 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     // NOTE it wants you to pass 1-3 arguments, but if you leave it blank it will delete all
+    // @ts-ignore
     await Bootcamp.deleteMany();
+    // @ts-ignore
     await Course.deleteMany();
     console.log('Data destroyed!!');
     process.exit();
