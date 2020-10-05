@@ -60,3 +60,13 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie('token', token, options)
     .json({ success: true, token });
 };
+
+// GET current logged in user FROM /api/v1/auth/me PRIVATE
+exports.getMe = asyncHandler(async (req, res, next) => {
+  // NOTE we are able to access req.user.id only on routes/methods that use the 'protect()' middleware method
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
