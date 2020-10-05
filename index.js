@@ -6,13 +6,13 @@ const connectDB = require('./config/dbConfig');
 const errorHandler = require('./middleware/error');
 const fileupload = require('express-fileupload');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 // Load env variables
 dotenv.config({ path: './config/config.env' });
 
 // Initial server setup
 const app = express();
-
 // Connect to database
 connectDB();
 
@@ -26,9 +26,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Cookie parser
+app.use(cookieParser());
+
 // File uploading
 app.use(fileupload());
-
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
