@@ -40,6 +40,31 @@ exports.login = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res);
 });
 
+// GET current logged in user FROM /api/v1/auth/me PRIVATE
+exports.getMe = asyncHandler(async (req, res, next) => {
+  // NOTE we are able to access req.user.id only on routes/methods that use the 'protect()' middleware method
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
+// GET forgot password FROM /api/v1/auth/forgotpassword PUBLIC
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ErrorResponse('There is no user with that email', 404));
+  }
+  // Get reset token
+  const resetToken = user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
 // CUSTOM get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = user.getSignedJwtToken();
@@ -60,13 +85,3 @@ const sendTokenResponse = (user, statusCode, res) => {
     .cookie('token', token, options)
     .json({ success: true, token });
 };
-
-// GET current logged in user FROM /api/v1/auth/me PRIVATE
-exports.getMe = asyncHandler(async (req, res, next) => {
-  // NOTE we are able to access req.user.id only on routes/methods that use the 'protect()' middleware method
-  const user = await User.findById(req.user.id);
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
-});
