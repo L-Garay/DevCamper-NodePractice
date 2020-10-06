@@ -4,11 +4,11 @@ const geocoder = require('../utils/geocoder');
 const Bootcamp = require('../models/Bootcamp');
 const path = require('path');
 
-// GET all bootcamps FROM /api/v1/bootcamps PUBLIC
+//NOTE GET all bootcamps FROM /api/v1/bootcamps PUBLIC
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
   res.status(200).json(res.advancedResults);
 });
-// GET single bootcamp FROM /api/v1/bootcamps/:id PUBLIC
+// NOTE GET single bootcamp FROM /api/v1/bootcamps/:id PUBLIC
 exports.getBootcamp = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.id);
   if (!bootcamp) {
@@ -18,7 +18,7 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ success: true, data: bootcamp });
 });
-// POST new bootcamp FROM /api/v1/bootcamps PRIVATE
+// NOTE POST new bootcamp FROM /api/v1/bootcamps PRIVATE
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
   // Add userId to req.body
   req.body.user = req.user.id;
@@ -35,20 +35,30 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.create(req.body);
   res.status(201).json({ success: true, data: bootcamp });
 });
-// PUT edit a bootcamp FROM /api/v1/bootcamps/:id PRIVATE
+// NOTE PUT edit a bootcamp FROM /api/v1/bootcamps/:id PRIVATE
 exports.updateBootcamp = asyncHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  let bootcamp = await Bootcamp.findById(req.params.id);
   if (!bootcamp) {
     return next(
       new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
     );
   }
+  // Make sure user is bootcamp owner
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User with id ${req.params.id} is not authorized to update this bootcamp`,
+        401
+      )
+    );
+  }
+  bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
   res.status(200).json({ success: true, data: bootcamp });
 });
-// DELETE single bootcamp FROM /api/v1/bootcamps/:id PRIVATE
+// NOTE DELETE single bootcamp FROM /api/v1/bootcamps/:id PRIVATE
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.id);
   if (!bootcamp) {
@@ -56,13 +66,20 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
     );
   }
-
+  // Make sure user is bootcamp owner
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User with id ${req.params.id} is not authorized to delete this bootcamp`,
+        401
+      )
+    );
+  }
   bootcamp.remove();
-
   res.status(200).json({ success: true, msg: 'Successfully deleted bootcamp' });
 });
 
-// GET bootcamps within radius FROM /api/v1/bootcamps/radius/:zipcode/:distance PRIVATE
+// NOTE GET bootcamps within radius FROM /api/v1/bootcamps/radius/:zipcode/:distance PRIVATE
 exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
   const { zipcode, distance } = req.params;
   // Get lat/long from geocoder
@@ -83,12 +100,21 @@ exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
   });
 });
 
-// PUT photo for bootcamp FROM /api/v1/bootcamps/:id/photo PRIVATE
+// NOTE PUT photo for bootcamp FROM /api/v1/bootcamps/:id/photo PRIVATE
 exports.uploadPhoto = asyncHandler(async (req, res, next) => {
   const bootcamp = await Bootcamp.findById(req.params.id);
   if (!bootcamp) {
     return next(
       new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
+    );
+  }
+  // Make sure user is bootcamp owner
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `User with id ${req.params.id} is not authorized to update this bootcamp`,
+        401
+      )
     );
   }
 
