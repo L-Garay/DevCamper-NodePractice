@@ -33,4 +33,7 @@ const ReviewSchema = new mongoose.Schema({
   },
 });
 
+// Prevents one user from submitting multiple reviews for a single bootcamp
+ReviewSchema.index({ bootcamp: 1, user: 1 }, { unique: true });
+
 module.exports = mongoose.model('Review', ReviewSchema);

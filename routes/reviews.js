@@ -1,5 +1,9 @@
 const express = require('express');
-const { getReviews, getReview } = require('../controllers/reviews');
+const {
+  getReviews,
+  getReview,
+  createReview,
+} = require('../controllers/reviews');
 
 const Review = require('../models/Review');
 // Protect routes middleware
@@ -8,13 +12,16 @@ const advancedResults = require('../middleware/advancedResults');
 
 const router = express.Router({ mergeParams: true });
 
-router.route('/').get(
-  advancedResults(Review, {
-    path: 'bootcamp',
-    select: 'name description',
-  }),
-  getReviews
-);
+router
+  .route('/')
+  .get(
+    advancedResults(Review, {
+      path: 'bootcamp',
+      select: 'name description',
+    }),
+    getReviews
+  )
+  .post(protect, authorize('user', 'admin'), createReview);
 
 router.route('/:id').get(getReview);
 
