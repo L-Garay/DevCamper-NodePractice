@@ -45,7 +45,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 // GET log out current user FROM /api/v1/auth/logout PRIVATE
 exports.logout = asyncHandler(async (req, res, next) => {
   res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000),
+    expires: new Date(Date.now() + 3 * 60 * 1000),
     httpOnly: true,
   });
   res.status(200).json({
